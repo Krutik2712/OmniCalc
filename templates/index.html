@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniCalc & Converter — Flask App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-icon">⚡</span>
+                <div>
+                    <h1>OmniCalc & Unit Hub</h1>
+                    <p class="subtitle">A full-stack Flask utility for math and conversions</p>
+                </div>
+            </div>
+            <div class="status-badge">
+                <span class="pulse-dot"></span> Flask API Online
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="calculator-tab">
+                <span class="tab-icon">🧮</span> Calculator
+            </button>
+            <button class="tab-btn" data-tab="converter-tab">
+                <span class="tab-icon">🔄</span> Unit Converter
+            </button>
+            <button class="tab-btn" data-tab="api-tab">
+                <span class="tab-icon">🔌</span> API Endpoints
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="card-wrapper">
+            <!-- TAB 1: CALCULATOR -->
+            <section id="calculator-tab" class="tab-panel active">
+                <div class="calc-grid-layout">
+                    <!-- Calculator Main Widget -->
+                    <div class="calc-widget">
+                        <!-- Screen Display -->
+                        <div class="calc-screen">
+                            <div class="calc-expression" id="calcExpression">0</div>
+                            <div class="calc-result" id="calcResult">0</div>
+                        </div>
+
+                        <!-- Error Message Banner -->
+                        <div class="error-banner hidden" id="calcError"></div>
+
+                        <!-- Calculator Keypad -->
+                        <div class="keypad">
+                            <button class="btn btn-fn" data-action="clear">AC</button>
+                            <button class="btn btn-fn" data-action="backspace">⌫</button>
+                            <button class="btn btn-op" data-action="op" data-value="sqrt">√</button>
+                            <button class="btn btn-op" data-action="op" data-value="divide">÷</button>
+
+                            <button class="btn btn-num" data-action="num" data-value="7">7</button>
+                            <button class="btn btn-num" data-action="num" data-value="8">8</button>
+                            <button class="btn btn-num" data-action="num" data-value="9">9</button>
+                            <button class="btn btn-op" data-action="op" data-value="multiply">×</button>
+
+                            <button class="btn btn-num" data-action="num" data-value="4">4</button>
+                            <button class="btn btn-num" data-action="num" data-value="5">5</button>
+                            <button class="btn btn-num" data-action="num" data-value="6">6</button>
+                            <button class="btn btn-op" data-action="op" data-value="subtract">−</button>
+
+                            <button class="btn btn-num" data-action="num" data-value="1">1</button>
+                            <button class="btn btn-num" data-action="num" data-value="2">2</button>
+                            <button class="btn btn-num" data-action="num" data-value="3">3</button>
+                            <button class="btn btn-op" data-action="op" data-value="add">+</button>
+
+                            <button class="btn btn-num" data-action="num" data-value="0">0</button>
+                            <button class="btn btn-num" data-action="dot">.</button>
+                            <button class="btn btn-op" data-action="op" data-value="power">xʸ</button>
+                            <button class="btn btn-equals" data-action="calculate">=</button>
+                        </div>
+                    </div>
+
+                    <!-- Calculator History Sidebar -->
+                    <div class="calc-history-panel">
+                        <div class="history-header">
+                            <h3>📜 Calculation History</h3>
+                            <button class="btn-text" id="clearHistoryBtn">Clear</button>
+                        </div>
+                        <ul class="history-list" id="historyList">
+                            <li class="history-empty">No calculations yet</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: UNIT CONVERTER -->
+            <section id="converter-tab" class="tab-panel">
+                <div class="converter-box">
+                    <!-- Category Selector Pills -->
+                    <label class="section-label">Select Measurement Type:</label>
+                    <div class="category-pills" id="categoryPills">
+                        <button class="pill-btn active" data-category="length">📏 Length</button>
+                        <button class="pill-btn" data-category="weight">⚖️ Weight</button>
+                        <button class="pill-btn" data-category="temperature">🌡️ Temperature</button>
+                        <button class="pill-btn" data-category="data">💾 Storage</button>
+                    </div>
+
+                    <!-- Converter Form Controls -->
+                    <form id="converterForm" class="converter-form" onsubmit="return false;">
+                        <div class="form-row">
+                            <!-- Input Value -->
+                            <div class="input-group">
+                                <label for="convValue">Enter Value</label>
+                                <input type="number" step="any" id="convValue" value="1" placeholder="e.g. 100" required>
+                            </div>
+
+                            <!-- From Unit -->
+                            <div class="input-group">
+                                <label for="convFromUnit">From</label>
+                                <select id="convFromUnit"></select>
+                            </div>
+
+                            <!-- Swap Button -->
+                            <div class="swap-col">
+                                <button type="button" class="btn-swap" id="swapUnitsBtn" title="Swap Units">⇄</button>
+                            </div>
+
+                            <!-- To Unit -->
+                            <div class="input-group">
+                                <label for="convToUnit">To</label>
+                                <select id="convToUnit"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" id="runConvertBtn">Convert Now</button>
+                        </div>
+                    </form>
+
+                    <!-- Converter Result Card -->
+                    <div class="converter-result-card hidden" id="convResultCard">
+                        <div class="conv-result-header">Result</div>
+                        <div class="conv-result-value" id="convResultValue">0</div>
+                        <div class="conv-result-formula" id="convResultFormula">Formula / Summary</div>
+                    </div>
+
+                    <div class="error-banner hidden" id="convError"></div>
+                </div>
+            </section>
+
+            <!-- TAB 3: API ENDPOINTS -->
+            <section id="api-tab" class="tab-panel">
+                <div class="api-doc-box">
+                    <h2>🔌 REST API Documentation</h2>
+                    <p>Integrate this Flask backend directly into external scripts, curl commands, or frontends.</p>
+
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="endpoint-url">/api/calculate</span>
+                        </div>
+                        <p class="endpoint-desc">Executes mathematical calculation.</p>
+                        <pre><code>// Request Body
+{
+  "operation": "add",    // add, subtract, multiply, divide, power, modulo, sqrt
+  "num1": 15,
+  "num2": 35
+}
+
+// Response (JSON)
+{
+  "success": true,
+  "result": 50,
+  "expression": "15 + 35 = 50"
+}</code></pre>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="endpoint-url">/api/convert</span>
+                        </div>
+                        <p class="endpoint-desc">Converts measurement units.</p>
+                        <pre><code>// Request Body
+{
+  "category": "length",   // length, weight, temperature, data
+  "value": 10,
+  "from_unit": "kilometers",
+  "to_unit": "miles"
+}
+
+// Response (JSON)
+{
+  "success": true,
+  "result": 6.213712,
+  "summary": "10 Kilometers (km) = 6.21371 Miles (mi)"
+}</code></pre>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span class="endpoint-url">/api/units</span>
+                        </div>
+                        <p class="endpoint-desc">Returns all supported categories and unit definitions.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Built with <strong>Python 3 & Flask</strong> • Powered by Antigravity</p>
+        </footer>
+    </div>
+
+    <!-- Inject initial unit definitions from Flask -->
+    <script>
+        window.SERVER_UNITS = {{ unit_definitions | tojson | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
